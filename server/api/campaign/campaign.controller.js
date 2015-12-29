@@ -16,7 +16,6 @@ var config = require('../../config/environment');
 function handleError(res, statusCode) {
   statusCode = statusCode || 500;
   return function(err) {
-    console.log(err);
     res.status(statusCode).send(err);
   };
 }
@@ -91,10 +90,11 @@ function removeEntity(res) {
 
 exports.index = function(req, res) {
   if (req.baseUrl === '/api/users/me/campaigns') {
-    Campaign.findAsync({
+    Campaign.find({
         user_id: req.user_id
       })
       .populate('images','link')
+      .execAsync()
       .then(responseWithResult(res))
       .catch(handleError(res));
   } else {
@@ -128,6 +128,7 @@ exports.show = function(req, res) {
   Campaign.findById(req.params.id)
     .populate('user_id', 'name')
     .populate('images','link')
+    .populate('volunteers','name')
     .execAsync()
     .then(handleEntityNotFound(res))
     .then(responseWithResult(res))
@@ -152,6 +153,7 @@ exports.create = function(req, res) {
   var data = _.extend(req.body, req.params, {
     user_id: req.user._id
   });
+  console.log(data);
   Campaign.createAsync(data)
     .then(responseWithResult(res, 201))
     .catch(handleError(res));

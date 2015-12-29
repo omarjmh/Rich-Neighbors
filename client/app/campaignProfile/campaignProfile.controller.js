@@ -5,7 +5,7 @@
 // angular.module('bApp')
 //   .controller('CampaignProfileController', CampaignProfileController);
 
-angular.module('bApp.CampaignProfileController', [])
+angular.module('bApp.CampaignProfileController', ['td.easySocialShare'])
 
 .controller('CampaignProfileController', ['$scope', 'Auth', '$stateParams', '$http', 'apiCall', 'geolocationFactory', 'generalFactory', 'donationFactory', function($scope, Auth, $stateParams, $http, apiCall, geolocationFactory, generalFactory, donationFactory) {
     $scope.campaign = apiCall.campaign;
@@ -16,7 +16,6 @@ angular.module('bApp.CampaignProfileController', [])
     $scope.linkApiCalls = apiCall.linkApiCalls;
     $scope.obj = apiCall.obj;
     $scope.addressDetails = 'jamma';
-
 
     $scope.updateDonatedAmount = function() {
       // donationFactory.updateDonatedAmount()
@@ -35,11 +34,13 @@ angular.module('bApp.CampaignProfileController', [])
           console.log(data);
         });
     };
+
     $http.get('/api/campaigns/' + $stateParams.id)
       .success(function(data) {
         $scope.updateDonatedAmount();
         $scope.campaign = data;
-        console.log(data)
+        //$scope.comments = data.comments;
+        console.log(data);
         generalFactory.setCampaignId(data._id);
 
         var amounts = _.pluck(data.contributors, 'amount');
@@ -87,7 +88,7 @@ angular.module('bApp.CampaignProfileController', [])
     $scope.comment = {};
 
     // Array where comments will be.
-    $scope.comments = [];
+    //$scope.comments = [];
 
     // Fires when form is submited.
     $scope.addComment = function() {
@@ -96,26 +97,30 @@ angular.module('bApp.CampaignProfileController', [])
         .success(function(data) {
           // console.log(data);
 
-          $http.get('/api/campaigns/' + $stateParams.id)
-            .success(function(data) {
-              $scope.linkApiCalls(data._links);
-            })
+          // $http.get('/api/campaign/' + $stateParams.id + '/comments')
+          //   .success(function(data) {
+          //     console.log(data);
+          //   })
 
           // $http.get('/api/campaigns/' + $stateParams.id + '/comments')
           //   .success(function(data) {
-          //     $scope.comments = data
-          //     console.log(data)
+          //     $scope.comments = data;
+          //     console.log(data);
           //       //console.log('comments', $scope.comments)
           //   })
-          .error(function(data) {
-            console.log('Error: ' + data);
-          });
-
+          // .error(function(data) {
+          //   console.log('Error: ' + data);
+          // });
+          var commentApi = {
+              'href': '/api/campaigns/' + $stateParams.id + '/comments',
+              'ref': 'comments'
+            }
+          $scope.linkApiCalls([commentApi]);
 
           $scope.formData.text = '';
+          $scope.form.$setPristine();
 
           // Reset clases of the form after submit.
-          $scope.form.$setPristine();
 
         })
 
@@ -266,9 +271,7 @@ angular.module('bApp.CampaignProfileController', [])
       $scope.supplyVolunteer.volunteer_id = id;
       $http.post('/api/contributors', $scope.supplyVolunteer)
         .success(function(data) {
-
           alert("Thanks for Signing Up!")
-          console.log(data);
 
         })
         .error(function(data) {
@@ -277,6 +280,84 @@ angular.module('bApp.CampaignProfileController', [])
         });
 
     }
+
+    //**************************filtering out supply contributions **********************
+
+    $scope.filterSupply = function(x, id) {
+
+      // console.log('obj.contributors', x);
+      // console.log('id', id)
+      // console.log('filtered', _.pluck(_.filter(_.pluck(_.filter(x, {
+      //   'type': "Supply"
+      // }), "item_id"), {
+      //   '_id': "5679bbd0e134af5d22bdb9e8"
+      // }), 'quantity'));
+
+
+      console.log('filteredid', _.pluck(_.filter(x, {
+        'type': "Supply",
+        'item_id': {
+          '_id': "5679bbd0e134af5d22bdb9e8"
+        }
+      }), 'amount'))
+
+
+      var numbers = _.pluck(_.filter(x, {
+        'type': "Supply",
+        'item_id': {
+          '_id': id
+        }
+      }), 'amount')
+
+
+
+      var reducednumber = _.reduce(numbers, function(total, n) {
+        return total + n;
+      })
+
+      // console.log('reducednumber', reducednumber)
+
+      return reducednumber
+    }
+
+
+    //**************************filtering out supply contributions **********************
+    $scope.filterVolunteer = function(x, id) {
+
+
+      // console.log('filteredid', _.pluck(_.filter(x, {
+      //   'type': "Supply",
+      //   'item_id': {
+      //     '_id': "5679bbd0e134af5d22bdb9e8"
+      //   }
+      // }), 'amount'))
+
+
+      var numbers = _.pluck(_.filter(x, {
+        'type': "Volunteer",
+        'volunteer_id': {
+          '_id': id
+        }
+      }), 'amount')
+
+
+
+      var reducednumber = _.reduce(numbers, function(total, n) {
+        return total + n;
+      })
+
+      // console.log('reducednumber', reducednumber)
+
+      return reducednumber
+    }
+
+    //**************************social share **********************
+
+
+
+
+
+
 
   }])
   .factory('campaignFactory', function($stateParams) {
