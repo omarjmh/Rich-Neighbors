@@ -20,12 +20,21 @@ class MainController {
       });
   }
 
-
+  }
   addMoreResults(dist) {
     var _this = this;
     var distance = dist || 500;
     var limit = 18 + _this.offsetLevel * 9;
+    this.http({
+        method: 'GET',
+        url: '/api/campaigns',
+        params: {
       this.campaignFactory.getCampaigns(this.loc[0], this.loc[1], limit, distance)
+          latitude: this.loc[1],
+          limit: limit,
+          distance: distance
+        }
+      })
       .success(data => {
         _this.campaigns = data //_.extend($campaigns, data);
         _this.offsetLevel += 1;
