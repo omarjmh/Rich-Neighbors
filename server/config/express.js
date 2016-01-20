@@ -51,7 +51,6 @@ module.exports = function(app) {
    * Lusca - express server security
    * https://github.com/krakenjs/lusca
    */
-<<<<<<< HEAD
 
   // if ('test' !== env) {
   //   app.use(lusca({
@@ -90,24 +89,6 @@ module.exports = function(app) {
       // Pass to next layer of middleware
       next();
   });
-=======
-  if ('test' !== env) {
-    app.use(lusca({
-      csrf: false,
-      // csrf: {
-      //   angular: true
-      // },
-      csp: { policy: "*" },
-      xframe: 'ALLOW FROM *',
-      hsts: {
-        maxAge: 31536000, //1 year, in seconds
-        includeSubDomains: true,
-        preload: true
-      },
-      xssProtection: false
-    }));
-  }
->>>>>>> updated lusca and allowed followers to grab campaign data
 
   app.set('appPath', path.join(config.root, 'client'));
 
